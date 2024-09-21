@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GPT to Word Format Converter</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+        textarea, #output {
+            width: 100%;
+            min-height: 300px;
+            margin-bottom: 10px;
+            padding: 10px;
+            box-sizing: border-box;
+            background-color: white;
+            border: 1px solid #ccc;
+        }
+        #output {
+            white-space: pre-wrap;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            margin-right: 10px;
+        }
+        h1, h2, h3, h4, h5, h6 {
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>GPT to Word Format Converter</h1>
+    <textarea id="input" placeholder="Paste your GPT text here..."></textarea>
+    <button onclick="formatText()">Format Text</button>
+    <button onclick="copyText()">Copy Formatted Text</button>
+    <div id="output"></div>
+
+    <script>
+        function formatText() {
+            let text = document.getElementById('input').value;
+            
+            // 保持标题格式
+            text = text.replace(/^(.*)\n={3,}/gm, '<h1>$1</h1>');
+            text = text.replace(/^(.*)\n-{3,}/gm, '<h2>$1</h2>');
+            text = text.replace(/^(#+)\s*(.*)/gm, function(match, hashes, title) {
+                return '<h' + hashes.length + '>' + title + '</h' + hashes.length + '>';
+            });
+            
+            // 保持项目符号列表
+            text = text.replace(/^(\s*)-\s*(.*)/gm, '$1<li>$2</li>');
+            text = text.replace(/(<li>.*<\/li>)/gs, '<ul>$1</ul>');
+            
+            // 保持粗体和斜体
+            text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            text = text.replace(/\*(.*?)\*/g, '<em>$1</em>');
+            
+            // 保持段落格式
+            text = text.replace(/\n\n/g, '</p><p>');
+            text = '<p>' + text + '</p>';
+            
+            document.getElementById('output').innerHTML = text;
+        }
+
+        function copyText() {
+            const output = document.getElementById('output');
+            const range = document.createRange();
+            range.selectNode(output);
+            window.getSelection().removeAllRanges();
+            window.getSelection().addRange(range);
+            document.execCommand('copy');
+            window.getSelection().removeAllRanges();
+            alert('Formatted text copied to clipboard!');
+        }
+    </script>
+</body>
+</html>
