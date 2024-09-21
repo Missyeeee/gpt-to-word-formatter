@@ -2,7 +2,7 @@
 
 [English](README.md) | 中文
 
-这个工具旨在帮助用户将从 GPT（如 ChatGPT）生成的文本快速格式化，使其更适合粘贴到 Microsoft Word 文档中。
+这个工具旨在帮助用户将从 GPT（如 ChatGPT）生成的文本快速格式化，使其更适合粘贴到 Microsoft Word /WPS文档中。
 
 ## 功能特点
 
