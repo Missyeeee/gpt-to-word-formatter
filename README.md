@@ -1,3 +1,5 @@
+[中文版 README](README_CN.md)
+
 # GPT to Word Formatter
 
 This tool helps format text copied from GPT for better compatibility with Word documents.
