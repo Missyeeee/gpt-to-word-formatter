@@ -23,20 +23,20 @@
         }
         #output {
             white-space: pre-wrap;
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 12pt;
+            line-height: 1.5;
         }
         button {
             padding: 10px 20px;
             font-size: 16px;
             margin-right: 10px;
         }
-        h1, h2, h3, h4, h5, h6 {
-            margin-top: 20px;
-            margin-bottom: 10px;
-        }
     </style>
 </head>
 <body>
     <h1>GPT to Word Format Converter</h1>
+    <p>Instructions: Paste your text, click "Format Text", then "Copy Formatted Text". In Word, paste using "Keep Text Only" option.</p>
     <textarea id="input" placeholder="Paste your GPT text here..."></textarea>
     <button onclick="formatText()">Format Text</button>
     <button onclick="copyText()">Copy Formatted Text</button>
@@ -53,39 +53,36 @@
                 // 处理编号主题
                 if (para.trim().match(/^\d+\./)) {
                     let [title, ...items] = para.split('\n');
-                    let formattedTitle = '<h3>' + title.trim() + '</h3>';
                     let formattedItems = items.map(item => {
                         item = item.trim();
                         if (item.startsWith('•')) {
-                            return '<li>' + item.substring(1).trim() + '</li>';
+                            // 使用特殊字符来模拟缩进和项目符号
+                            return '    • ' + item.substring(1).trim();
                         }
                         return item;
                     });
-                    return formattedTitle + '<ul>' + formattedItems.join('') + '</ul>';
+                    // 使用特殊字符来模拟标题格式
+                    return title + '\n' + formattedItems.join('\n');
                 }
                 // 处理其他段落
                 else {
-                    return '<p>' + para.trim() + '</p>';
+                    return para.trim();
                 }
-            }).join('');
+            }).join('\n\n');
 
-            // 添加整体样式，使用 Times New Roman 字体
-            formattedText = '<div style="font-family: \'Times New Roman\', Times, serif; font-size: 12pt; line-height: 1.5;">' + 
-                            formattedText + 
-                            '</div>';
+            // 添加一些额外的换行符来确保段落分隔
+            formattedText = formattedText.replace(/\n\n/g, '\n\n\n');
 
-            document.getElementById('output').innerHTML = formattedText;
+            document.getElementById('output').textContent = formattedText;
         }
 
         function copyText() {
             const output = document.getElementById('output');
-            const range = document.createRange();
-            range.selectNode(output);
-            window.getSelection().removeAllRanges();
-            window.getSelection().addRange(range);
-            document.execCommand('copy');
-            window.getSelection().removeAllRanges();
-            alert('Formatted text copied to clipboard!');
+            navigator.clipboard.writeText(output.textContent).then(function() {
+                alert('Formatted text copied to clipboard!');
+            }, function(err) {
+                console.error('Could not copy text: ', err);
+            });
         }
     </script>
 </body>
