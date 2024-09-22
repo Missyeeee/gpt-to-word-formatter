@@ -3,84 +3,116 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GPT to Word Format Converter</title>
+    <title>Text Formatter for Word</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
+            line-height: 1.6;
+            margin: 0;
             padding: 20px;
-            background-color: #f0f0f0;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
         }
         textarea, #output {
             width: 100%;
-            min-height: 300px;
+            height: 200px;
             margin-bottom: 10px;
             padding: 10px;
-            box-sizing: border-box;
-            background-color: white;
-            border: 1px solid #ccc;
+            border: 1px solid #ddd;
+            font-size: 12pt;
         }
         #output {
+            margin-top: 20px;
+            background-color: #fff;
             white-space: pre-wrap;
-            font-family: 'Times New Roman', Times, serif;
-            font-size: 12pt;
-            line-height: 1.5;
+            overflow-y: auto;
         }
         button {
-            padding: 10px 20px;
-            font-size: 16px;
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            cursor: pointer;
             margin-right: 10px;
+        }
+        button:hover {
+            background-color: #45a049;
         }
     </style>
 </head>
 <body>
-    <h1>GPT to Word Format Converter</h1>
-    <p>Instructions: Paste your text, click "Format Text", then "Copy Formatted Text". In Word, paste using "Keep Text Only" option.</p>
-    <textarea id="input" placeholder="Paste your GPT text here..."></textarea>
-    <button onclick="formatText()">Format Text</button>
-    <button onclick="copyText()">Copy Formatted Text</button>
-    <div id="output"></div>
+    <div class="container">
+        <h1>Text Formatter for Word</h1>
+        <textarea id="input" placeholder="Paste your text here..."></textarea>
+        <button onclick="formatTextForWord()">Format Text</button>
+        <button onclick="copyFormattedText()">Copy Formatted Text</button>
+        <div id="output"></div>
+    </div>
 
     <script>
-        function formatText() {
-            let text = document.getElementById('input').value;
-            
-            // 分割成段落
-            let paragraphs = text.split(/\n(?=\d+\.)/);
-            
-            let formattedText = paragraphs.map(function(para) {
-                // 处理编号主题
-                if (para.trim().match(/^\d+\./)) {
-                    let [title, ...items] = para.split('\n');
-                    let formattedItems = items.map(item => {
-                        item = item.trim();
-                        if (item.startsWith('•')) {
-                            // 使用特殊字符来模拟缩进和项目符号
-                            return '    • ' + item.substring(1).trim();
-                        }
-                        return item;
-                    });
-                    // 使用特殊字符来模拟标题格式
-                    return title + '\n' + formattedItems.join('\n');
-                }
-                // 处理其他段落
-                else {
-                    return para.trim();
-                }
-            }).join('\n\n');
+        function isEnglish(text) {
+            // Simple check: if the text contains mostly ASCII characters, consider it English
+            return /^[\x00-\x7F]*$/.test(text.replace(/[0-9\s\p{P}]/gu, ''));
+        }
 
-            // 添加一些额外的换行符来确保段落分隔
-            formattedText = formattedText.replace(/\n\n/g, '\n\n\n');
+        function formatTextForWord() {
+            let text = document.getElementById('input').value;
+            let lines = text.split('\n');
+            let formattedText = '';
+            let currentLevel = 0;
+
+            // Determine the font based on the overall text content
+            let fontFamily = isEnglish(text) ? "Times New Roman" : "Arial";
+            formattedText += `Font: ${fontFamily}\n\n`;
+
+            lines.forEach((line, index) => {
+                line = line.trim();
+                if (line === '') {
+                    formattedText += '\n';
+                } else if (line.startsWith('•')) {
+                    // Main bullet point
+                    if (currentLevel > 0) {
+                        formattedText += '\n';
+                    }
+                    formattedText += '• ' + line.substring(1).trim() + '\n';
+                    currentLevel = 0;
+                } else if (line.startsWith('-')) {
+                    // Sub-bullet point
+                    let level = 1;
+                    while (line.startsWith('-')) {
+                        level++;
+                        line = line.substring(1).trim();
+                    }
+                    let indent = '\t'.repeat(level - 1);
+                    formattedText += indent + '- ' + line + '\n';
+                    currentLevel = level;
+                } else {
+                    // Regular paragraph
+                    if (currentLevel > 0) {
+                        formattedText += '\n';
+                    }
+                    formattedText += line + '\n\n';
+                    currentLevel = 0;
+                }
+            });
 
             document.getElementById('output').textContent = formattedText;
         }
 
-        function copyText() {
-            const output = document.getElementById('output');
-            navigator.clipboard.writeText(output.textContent).then(function() {
-                alert('Formatted text copied to clipboard!');
-            }, function(err) {
+        function copyFormattedText() {
+            const outputText = document.getElementById('output').textContent;
+            navigator.clipboard.writeText(outputText).then(() => {
+                alert('Formatted text copied to clipboard. Paste in Word and apply the suggested font.');
+            }, (err) => {
                 console.error('Could not copy text: ', err);
             });
         }
