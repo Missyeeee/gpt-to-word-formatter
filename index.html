@@ -46,26 +46,35 @@
         function formatText() {
             let text = document.getElementById('input').value;
             
-            // 保持标题格式
-            text = text.replace(/^(.*)\n={3,}/gm, '<h1>$1</h1>');
-            text = text.replace(/^(.*)\n-{3,}/gm, '<h2>$1</h2>');
-            text = text.replace(/^(#+)\s*(.*)/gm, function(match, hashes, title) {
-                return '<h' + hashes.length + '>' + title + '</h' + hashes.length + '>';
-            });
+            // 分割成段落
+            let paragraphs = text.split(/\n(?=\d+\.)/);
             
-            // 保持项目符号列表
-            text = text.replace(/^(\s*)-\s*(.*)/gm, '$1<li>$2</li>');
-            text = text.replace(/(<li>.*<\/li>)/gs, '<ul>$1</ul>');
-            
-            // 保持粗体和斜体
-            text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-            text = text.replace(/\*(.*?)\*/g, '<em>$1</em>');
-            
-            // 保持段落格式
-            text = text.replace(/\n\n/g, '</p><p>');
-            text = '<p>' + text + '</p>';
-            
-            document.getElementById('output').innerHTML = text;
+            let formattedText = paragraphs.map(function(para) {
+                // 处理编号主题
+                if (para.trim().match(/^\d+\./)) {
+                    let [title, ...items] = para.split('\n');
+                    let formattedTitle = '<h3>' + title.trim() + '</h3>';
+                    let formattedItems = items.map(item => {
+                        item = item.trim();
+                        if (item.startsWith('•')) {
+                            return '<li>' + item.substring(1).trim() + '</li>';
+                        }
+                        return item;
+                    });
+                    return formattedTitle + '<ul>' + formattedItems.join('') + '</ul>';
+                }
+                // 处理其他段落
+                else {
+                    return '<p>' + para.trim() + '</p>';
+                }
+            }).join('');
+
+            // 添加整体样式，使用 Times New Roman 字体
+            formattedText = '<div style="font-family: \'Times New Roman\', Times, serif; font-size: 12pt; line-height: 1.5;">' + 
+                            formattedText + 
+                            '</div>';
+
+            document.getElementById('output').innerHTML = formattedText;
         }
 
         function copyText() {
